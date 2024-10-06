@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": "notisfly"
+        },
+        {
+            "path": "backend",
+            "name": "backend"
+        },
+        {
+            "path": "apps/web",
+            "name": "web"
+        }
+    ]
+}
