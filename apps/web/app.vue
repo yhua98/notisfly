@@ -1,6 +1,10 @@
+<script lang="ts" setup>
+import '@unocss/reset/tailwind.css'
+import Toaster from '~/components/toast/Toaster.vue'
+</script>
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
+  <Toaster />
 </template>

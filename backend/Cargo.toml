@@ -1,6 +1,29 @@
 [package]
-name = "backend"
+name = "notisfly-backend"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+axum = { version = "0.7.7", features = ["macros","ws","json"] }
+axum-extra = { version = "0.9.4", features = ["typed-header"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.8", features = [ "runtime-tokio", "tls-rustls-ring", "postgres", "sqlite","uuid","chrono" ] }
+tokio = { version = "1.40.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+headers = "0.4.0"
+yrs = "0.21.1"
+futures = "0.3"
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+uuid = { version = "1.10.0", features = ["serde", "v4", "v7"] }
+tower-http = { version = "0.6.1", features = ["cors"] }
+nanoid = { version = "0.4.0" }
+clap = { version = "4.5.19", features = ["derive"] }
+dotenvy = "0.15.7"
+chrono = { version = "0.4.38", features = ["serde"]}
+anyhow = "1.0.89"
+thiserror = "1.0.64"
+jsonwebtoken = "9.3.0"
+once_cell = "1.20.1"
+

@@ -11,6 +11,10 @@
         {
             "path": "apps/web",
             "name": "web"
+        },
+        {
+            "path": "packages/editor",
+            "name": "editor"
         }
     ]
 }
