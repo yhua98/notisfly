@@ -1,7 +1,8 @@
-mod shortnotes;
-mod user;
 mod auth;
+mod notes;
+mod shortnotes;
 mod types;
+mod user;
 
 use axum::Router;
 
@@ -11,4 +12,5 @@ pub fn register() -> Router<AppState> {
     Router::new()
         .nest("/shortnote", shortnotes::register())
         .nest("/user", user::register())
+        .nest("/notes", notes::register())
 }

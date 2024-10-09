@@ -8,7 +8,7 @@ definePageMeta({
     <EditorManualProvider>
         <div class="h-100vh flex">
             <SideBoard class="z-100" />
-            <!-- <div class="w-400px border-r-(1px solid [var(--bg-200)])">
+            <!-- <div class="w-400px h-full border-r-(1px solid [var(--bg-200)])">
                 <NoteTitleList />
             </div> -->
             <div class="grow-1">
@@ -17,7 +17,7 @@ definePageMeta({
                     <ThemeSwitch class="ml-auto" />
                 </div>
                 <div class="flex databoard-content-wrapper p-8px h-[calc(100%-64px)] overflow-auto">
-                    <EditorManualContainer class="w-512px mx-auto" />
+                    <EditorManualContainer class="w-768px mx-auto" />
                 </div>
             </div>
         </div>

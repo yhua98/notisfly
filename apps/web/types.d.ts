@@ -5,14 +5,8 @@ export type ResponsePayload<T = any> = {
 	data?: T;
 };
 
-export type NoteMeta = {
-	id: string;
-	title: string;
-	tags: string[];
-};
-
 export type Note = {
-	id: string;
+	note_id: string;
 	title: string;
 	tags: string[];
 	content: Array;

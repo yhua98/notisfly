@@ -1,0 +1,24 @@
+2024-10-09T00:04:32.445302Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo\\daemon\\551290cb7857c4d7-turbo.log.2024-10-08")}
+2024-10-09T00:04:32.445327Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2024-10-09T00:04:32.546264Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo\\daemon\\551290cb7857c4d7-turbo.log.2024-10-09")}
+2024-10-09T00:04:32.546336Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2024-10-09T00:04:37.447024Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf(".turbo\\daemon")}
+2024-10-09T00:04:37.447035Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2024-10-09T00:07:23.644880Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps\\web\\components\\editor\\ManualContainer.vue")}
+2024-10-09T00:07:23.644893Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@notisfly/web"), path: AnchoredSystemPathBuf("apps\\web") }}))
+2024-10-09T00:18:39.349018Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps\\web\\components\\editor\\ManualContainer.vue")}
+2024-10-09T00:18:39.349045Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@notisfly/web"), path: AnchoredSystemPathBuf("apps\\web") }}))
+2024-10-09T00:18:39.349099Z  WARN turborepo_lib::package_changes_watcher: hashes are the same, no need to rerun
+2024-10-09T00:18:59.648994Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps\\web\\components\\editor\\ManualContainer.vue")}
+2024-10-09T00:18:59.649011Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@notisfly/web"), path: AnchoredSystemPathBuf("apps\\web") }}))
+2024-10-09T00:19:01.849527Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps\\web\\components\\editor\\ManualContainer.vue")}
+2024-10-09T00:19:01.849537Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@notisfly/web"), path: AnchoredSystemPathBuf("apps\\web") }}))
+2024-10-09T00:19:01.882135Z  WARN turborepo_lib::package_changes_watcher: hashes are the same, no need to rerun
+2024-10-09T00:19:02.347485Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps\\web\\components\\editor\\ManualContainer.vue")}
+2024-10-09T00:19:02.347494Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@notisfly/web"), path: AnchoredSystemPathBuf("apps\\web") }}))
+2024-10-09T00:19:02.364130Z  WARN turborepo_lib::package_changes_watcher: hashes are the same, no need to rerun
+2024-10-09T00:19:10.952965Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps\\web\\components\\editor\\ManualContainer.vue")}
+2024-10-09T00:19:10.952997Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@notisfly/web"), path: AnchoredSystemPathBuf("apps\\web") }}))
+2024-10-09T00:19:11.449883Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps\\web\\components\\editor\\ManualContainer.vue")}
+2024-10-09T00:19:11.449894Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("@notisfly/web"), path: AnchoredSystemPathBuf("apps\\web") }}))
+2024-10-09T00:19:11.449918Z  WARN turborepo_lib::package_changes_watcher: hashes are the same, no need to rerun

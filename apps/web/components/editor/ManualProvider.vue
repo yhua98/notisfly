@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide } from 'vue';
 import '@toeverything/theme/style.css';
-import { Schema } from '@blocksuite/store';
+import { Schema, type DocMeta } from '@blocksuite/store';
 import { DocCollection } from '@blocksuite/store';
 import { AffineSchemas } from '@blocksuite/blocks';
 
@@ -9,8 +9,9 @@ import { effects as blocksEffects } from '@blocksuite/blocks/effects'
 import { effects as presetsEffects } from '@blocksuite/presets/effects'
 
 import { ref } from 'vue';
-import type { NoteMeta, ResponsePayload } from '~/types';
 import { getFullUrl } from '~/constants';
+
+import * as http from '~/utils/http'
 
 import { useToast } from '~/components/toast/use-toast'
 
@@ -33,7 +34,7 @@ export interface AppState {
     collection: DocCollection;
     docId: Ref<string>;
     metasSynced: Ref<boolean>;
-    docSyncUrl?: (() => string) | string;
+    docSyncUrl: Ref<(() => string)>;
 }
 
 provide('appState', { collection, docId, metasSynced, docSyncUrl } as AppState);
@@ -42,27 +43,35 @@ onMounted(async () => {
     metasSynced.value = false;
     await collection.waitForSynced();
     // request short_note remote metas
-    const response = await fetch(getFullUrl('/api/shortnote/metas'), {
+    const { data, status } = await http.post<
+        (DocMeta & { note_id: string, created_at: string, note_type: string })[]
+    >(getFullUrl('/api/notes/metas'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
         },
     });
-    const { status, data }: ResponsePayload<NoteMeta[]> = await response.json();
-    if (status === 200 && data) {
-        // biome-ignore lint/complexity/noForEach: <explanation>
-        data.forEach(meta => {
+    if (status === 200 && Array.isArray(data)) {
+        for (const meta of data) {
             collection.meta.addDocMeta({
-                id: meta.id,
+                id: meta.note_id,
                 title: meta.title,
                 tags: meta.tags,
-                createDate: meta.created_at,
+                createDate: new Date(meta.created_at).getMilliseconds(),
+                type: meta.note_type
             });
-        });
+        }
         toast({
             title: '元信息',
             description: '元信息同步成功',
+            duration: 3000,
+        })
+    } else {
+        toast({
+            title: '元信息',
+            description: '元信息同步失败',
+            duration: 5000,
         })
     }
     metasSynced.value = true;

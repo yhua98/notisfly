@@ -14,18 +14,14 @@ const update = () => {
     <div class="group relative">
         <div :class="'h-100% transition-width ease-out transition-5000 overflow-hidden border-r-(1px [var(--bg-200)] solid) bg-[var(--bg-100)] ' + (isFloat
             ? ' fixed transform w-0 group-hover:(w-300px shadow-2xl) h-100vh' : 'relative w-300px')">
-            <div class=" w-300px p-8px">
+            <div class=" w-300px h-100vh p-8px flex flex-col justify-start">
                 <div class="h-64px flex items-center">
                     <img class=" hero animate-rotate-in-down-left border-2px hover:border-[var(--accent-100)] w-48px h-48px rounded-1/2"
                         src="https://picsum.photos/200/200" />
                     <span class="ml-8px text-20px">Notisfly</span>
                 </div>
-                <div class="mt-16px">
-                    <DateTime />
-                </div>
-                <div class="mt-16px">
-                    <NoteList />
-                </div>
+                <DateTime />
+                <NoteList class="grow-1" />
             </div>
         </div>
         <div @click="isFloat = !isFloat" :class="'transform -translate-y-50% hover:color-blue color-[var(--text-200)] cursor-pointer bg-[var(--bg-100)] ' + (isFloat

@@ -1,22 +1,23 @@
 <script setup lang="ts">
-import { inject, ref, toValue } from 'vue';
+import { inject, ref } from 'vue';
 import { onEffectCleanup } from "@vue/reactivity"
-import type { AppState } from './Provider.vue';
+import type { AppState } from './ManualProvider.vue';
 import Tags from './tags/Tags.vue';
-import { AffineEditorContainer, createEmptyDoc } from '@blocksuite/presets'
-import type { Doc } from '@blocksuite/store';
+import { AffineEditorContainer } from '@blocksuite/presets'
 import { RefNodeSlotsExtension, RefNodeSlotsProvider } from '@blocksuite/blocks';
 import { Icon } from '@iconify/vue'
-import type { NoteCreatePayload } from '~/types';
+import type { Note, NoteCreatePayload } from '~/types';
 import * as Yjs from 'yjs'
 import { getFullUrl } from '~/constants';
 import File from '~/components/icons/File.vue';
 import { useToast } from '~/components/toast/use-toast'
+import * as http from '~/utils/http'
+// import { Job } from '@blocksuite/store'
 
 const { toast } = useToast()
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
-const { collection, docId: docIdRef, docSyncUrl } = inject<AppState>('appState')!;
+const { collection, docId: docIdRef } = inject<AppState>('appState')!;
 const editorContainerRef = ref<HTMLDivElement>();
 
 const tags = ref<string[]>([]);
@@ -30,8 +31,6 @@ const isSaving = ref(false);
 const isMaximized = ref(false);
 const isAutoSaveing = ref(false);
 const isOpenAutoSave = ref(false);
-const isDiary = ref(false);
-const doc = ref<Doc>()
 
 watch(() => editorMode.value, (mode) => {
   if (mode === 'edgeless') {
@@ -50,76 +49,64 @@ watch(() => docIdRef.value, async (docId) => {
   if (!docId) return;
   isLoading.value = true;
   await collection.waitForSynced();
-
-  let _doc = null
-
-  // request short_note remote content
+  // request note remote content
   {
-    // biome-ignore lint/complexity/noExtraBooleanCast: <explanation>
-    const url = getFullUrl(!!docSyncUrl.value ? docSyncUrl.value?.() : `/api/shortnote/note/${docId}`);
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
-      },
-    });
-    const { status, data } = await response.json();
+    const { data, status } = await http.get<Note>(
+      getFullUrl(`/api/notes/${docId}`),
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
+        },
+      });
     if (status === 200 && data) {
-      _doc = (() => {
-        let doc = collection.getDoc(docId)
-        isDiary.value = false
-        if (!doc && !!data.dnid) {
-          isDiary.value = true
-          doc = createEmptyDoc().init();
-          doc.collection.start()
-        }
-        return doc
-      })()
-      if (!_doc) {
+      const doc = collection.getDoc(docId)
+      if (!doc) {
         console.error('doc not found: docId = ', docId)
+        setTimeout(() => {
+          isLoading.value = false;
+          toast({
+            title: '加载失败',
+            description: '文章加载失败',
+            duration: 1000,
+          })
+        }, 300);
         return
       };
-      if (!isDiary.value) {
-        _doc.load();
-      }
       // content is empty, do nothing
-      if (data.content.length) {
+      if (data.content.length > 0) {
         const content = new Uint8Array(data.content)
-        Yjs.applyUpdateV2(_doc.spaceDoc, content)
+        Yjs.applyUpdateV2(doc.spaceDoc, content)
       };
-      _doc.resetHistory()
     }
   }
-  if (!isDiary.value) {
-    if (!docId) return;
-    _doc = collection.getDoc(docId)
-    if (!_doc) {
-      console.error('doc not found: docId = ', docId)
-      return
-    };
-  }
+  const doc = collection.getDoc(docId)
+  if (!doc) {
+    console.error('doc not found: docId = ', docId)
+    setTimeout(() => {
+      isLoading.value = false;
+      toast({
+        title: '加载失败',
+        description: '文章加载失败',
+        duration: 1000,
+      })
+    }, 300);
+    return
+  };
   // biome-ignore lint/style/noNonNullAssertion: <explanation>
-  const meta = _doc.collection.meta.getDocMeta(docId)!
-  _doc.load();
-  if (_doc.isEmpty) {
-    const pageBlockId = _doc.addBlock('affine:page', {});
-    _doc.addBlock('affine:surface', {}, pageBlockId);
-    const noteId = _doc.addBlock('affine:note', {}, pageBlockId);
-    _doc.addBlock('affine:paragraph', {}, noteId);
+  const meta = doc.collection.meta.getDocMeta(docId)!
+  doc.load();
+  if (doc.isEmpty) {
+    const pageBlockId = doc.addBlock('affine:page', {});
+    doc.addBlock('affine:surface', {}, pageBlockId);
+    const noteId = doc.addBlock('affine:note', {}, pageBlockId);
+    doc.addBlock('affine:paragraph', {}, noteId);
   }
-  if (!_doc.root) {
-    await new Promise(resolve => _doc.slots.rootAdded.once(resolve));
+  if (!doc.root) {
+    await new Promise(resolve => doc.slots.rootAdded.once(resolve));
   }
-  if (isDiary.value) {
-    // doc.addBlock("prop:title", { text: new Text("20241007日志") })
-    // clear title
-    _doc.root.title.yText.delete(0, _doc.root.title.yText.length)
-    _doc.root.title.yText.insert(0, `📌 ${docId}日志`)
-    // doc.root.yBlock.get("prop:title").insert(1, "20241007日志")
-  }
-  editor.doc = _doc;
-  doc.value = _doc
+  editor.doc = doc;
 
   if (editor && editorContainerRef.value && !isInit.value) {
     isInit.value = true;
@@ -132,7 +119,6 @@ watch(() => docIdRef.value, async (docId) => {
     });
   }
   tags.value = Array.from(meta?.tags ?? [])
-  window.doc = _doc
   setTimeout(() => {
     isLoading.value = false;
     toast({
@@ -159,70 +145,73 @@ watchEffect(() => {
 
 const onSaveClicked = async () => {
   isSaving.value = true;
-  if (isDiary.value) {
-    const _doc = toValue(doc)
-    await _doc.collection.waitForSynced();
-    // if (docIdRef.value === "20241008") {
-    //   _doc?.clear()
-    // }
-    const content = Yjs.encodeStateAsUpdateV2(_doc.spaceDoc)
-    const noteCreatePayload: NoteCreatePayload = {
-      title: _doc.meta.title,
-      tags: Array.from(_doc.meta.tags),
-      content: Array.from(content),
-    }
-    {
-      const response = await fetch(getFullUrl(`/api/shortnote/diary/${docIdRef.value}`), {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
-        },
-        body: JSON.stringify(noteCreatePayload),
-      });
-      const { status } = await response.json();
-      if (status === 200) {
-        console.log('save success')
-      }
-    }
-    isSaving.value = false;
+  if (!docIdRef.value) {
     toast({
-      title: '保存成功',
-      description: '保存成功',
+      title: '保存失败',
+      description: '没有选择文档',
       duration: 5000,
     })
-  } else {
-    if (!docIdRef.value) return;
-    await collection.waitForSynced();
-    const doc = collection.getDoc(docIdRef.value)
-    if (!doc || !doc.meta) return;
-    const content = Yjs.encodeStateAsUpdateV2(doc.spaceDoc)
-    const noteCreatePayload: NoteCreatePayload = {
-      title: doc.meta.title,
-      tags: Array.from(doc.meta.tags),
-      content: Array.from(content),
-    }
-    // update short_note remote content
-    {
-      const response = await fetch(getFullUrl(`/api/shortnote/note/${docIdRef.value}`), {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
-        },
-        body: JSON.stringify(noteCreatePayload),
-      });
-      const { status } = await response.json();
-      if (status === 200) {
-        console.log('save success')
-      }
-    }
     isSaving.value = false;
+    return
+  };
+  await collection.waitForSynced();
+  const doc = collection.getDoc(docIdRef.value)
+  if (!doc || !doc.meta) {
+    console.error('doc not found: docId = ', docIdRef.value)
     toast({
-      title: '保存成功',
-      description: '保存成功',
+      title: '保存失败',
+      description: '没有选择文档',
       duration: 5000,
     })
+    isSaving.value = false;
+    return
+  };
+  const content = Yjs.encodeStateAsUpdateV2(doc.spaceDoc)
+  const noteCreatePayload: NoteCreatePayload = {
+    title: doc.meta.title,
+    tags: Array.from(doc.meta.tags),
+    content: Array.from(content),
+  }
+  // update note remote content
+  try {
+    const { status } = await http.patch<Note>(getFullUrl(`/api/notes/${docIdRef.value}`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
+      },
+      body: JSON.stringify(noteCreatePayload),
+    });
+    if (status === 200) {
+      console.log('save success')
+      toast({
+        title: '保存成功',
+        description: '保存成功',
+        duration: 5000,
+      })
+      isSaving.value = false;
+      // const { collection } = doc
+      // const job = new Job({ collection })
+      // const json = await job.docToSnapshot(doc)
+      // console.log('json', json)
+    } else {
+      console.error('save failed')
+      toast({
+        title: '保存失败',
+        description: '保存失败',
+        duration: 5000,
+      })
+      isSaving.value = false;
+    }
+  } catch (e) {
+    console.error(e)
+    toast({
+      title: '保存失败',
+      description: '保存失败',
+      duration: 5000,
+    })
+    isSaving.value = false;
+    return
   }
 }
 </script>
@@ -230,7 +219,7 @@ const onSaveClicked = async () => {
 <template>
   <div
     :class="isMaximized ? 'p-32px fixed top-0 left-0 z-100 w-full h-full flex justify-center items-center bg-[var(--bg-100)]' : ''">
-    <div :class="isMaximized ? 'h-full w-768px shadow-xl' : ''" class="transition-all transition-2000 min-h-200px editor-container-wrapper relative border-(1px solid [var(--bg-200)]) 
+    <div :class="isMaximized ? 'h-full w-768px shadow-xl' : ''" class="transition-all transition-2000 min-h-400px editor-container-wrapper relative border-(1px solid [var(--bg-200)]) 
     bg-[var(--bg-50)] rounded-16px flex flex-col overflow-hidden">
       <div class=" py-4px px-16px flex text-[var(--text-200)] ">
         <Icon v-if="!isSaving" @click="onSaveClicked" size="6"
@@ -303,7 +292,7 @@ const onSaveClicked = async () => {
   }
 
   :deep(.affine-page-root-block-container) {
-    padding: 0 8px;
+    padding: 0 16px;
   }
 }
 </style>
