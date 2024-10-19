@@ -8,7 +8,7 @@ pub async fn create_note(
     let note = sqlx::query_as::<_, types::Note>(
         "
         INSERT INTO notes (user_id, note_id, note_type, title, tags, content, note_version, is_latest)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING *;
         ",
     )

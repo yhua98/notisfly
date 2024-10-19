@@ -16,5 +16,8 @@
             "path": "packages/editor",
             "name": "editor"
         }
-    ]
+    ],
+    "settings": {
+        "liveServer.settings.multiRootWorkspaceName": "notisfly"
+    }
 }

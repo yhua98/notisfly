@@ -4,6 +4,7 @@ import { onEffectCleanup } from "@vue/reactivity"
 import type { AppState } from './ManualProvider.vue';
 import Tags from './tags/Tags.vue';
 import { AffineEditorContainer } from '@blocksuite/presets'
+import { NotEditor } from '@notisfly/editor'
 import { RefNodeSlotsExtension, RefNodeSlotsProvider } from '@blocksuite/blocks';
 import { Icon } from '@iconify/vue'
 import type { Note, NoteCreatePayload } from '~/types';
@@ -12,7 +13,7 @@ import { getFullUrl } from '~/constants';
 import File from '~/components/icons/File.vue';
 import { useToast } from '~/components/toast/use-toast'
 import * as http from '~/utils/http'
-// import { Job } from '@blocksuite/store'
+import { Job } from '@blocksuite/store'
 
 const { toast } = useToast()
 
@@ -23,7 +24,8 @@ const editorContainerRef = ref<HTMLDivElement>();
 const tags = ref<string[]>([]);
 const isInit = ref(false)
 
-const editor: AffineEditorContainer = new AffineEditorContainer();
+// const editor: AffineEditorContainer = new AffineEditorContainer();
+const editor: NotEditor = new NotEditor()
 const editorMode = ref<'edgeless' | 'page'>('edgeless');
 const refNodeSlotsExtension = RefNodeSlotsExtension();
 const isLoading = ref(false);
@@ -33,11 +35,11 @@ const isAutoSaveing = ref(false);
 const isOpenAutoSave = ref(false);
 
 watch(() => editorMode.value, (mode) => {
-  if (mode === 'edgeless') {
-    editor.mode = 'page';
-  } else {
-    editor.mode = 'edgeless';
-  }
+  // if (mode === 'edgeless') {
+  //   editor.mode = 'page';
+  // } else {
+  //   editor.mode = 'edgeless';
+  // }
 });
 
 watch(() => tags.value, (tags) => {
@@ -106,19 +108,22 @@ watch(() => docIdRef.value, async (docId) => {
   if (!doc.root) {
     await new Promise(resolve => doc.slots.rootAdded.once(resolve));
   }
-  editor.doc = doc;
+  collection.meta.setDocMeta(docId, {
+    title: doc.spaceDoc.getText("title").toString(),
+    tags: doc.spaceDoc.getArray<string>("tags").toArray()
+  });
+  editor.setDoc(doc);
 
   if (editor && editorContainerRef.value && !isInit.value) {
     isInit.value = true;
-    editor.pageSpecs = [refNodeSlotsExtension, ...editor.pageSpecs]
+    // editor.pageSpecs = [refNodeSlotsExtension, ...editor.pageSpecs]
 
     editorContainerRef.value.appendChild(editor);
-    editor.std.get(RefNodeSlotsProvider).docLinkClicked.on((event) => {
-      console.log('docLinkClicked', event.pageId)
-      docIdRef.value = event.pageId
-    });
+    // editor.std.get(RefNodeSlotsProvider).docLinkClicked.on((event) => {
+    //   console.log('docLinkClicked', event.pageId)
+    //   docIdRef.value = event.pageId
+    // });
   }
-  tags.value = Array.from(meta?.tags ?? [])
   setTimeout(() => {
     isLoading.value = false;
     toast({
@@ -155,7 +160,15 @@ const onSaveClicked = async () => {
     return
   };
   await collection.waitForSynced();
-  const doc = collection.getDoc(docIdRef.value)
+
+  const doc = collection.getDoc(docIdRef.value)!
+
+  // const { collection } = doc
+  const job = new Job({ collection })
+  const json = await job.docToSnapshot(doc)
+  console.log('json', json)
+  isSaving.value = false;
+  return
   if (!doc || !doc.meta) {
     console.error('doc not found: docId = ', docIdRef.value)
     toast({
@@ -168,8 +181,8 @@ const onSaveClicked = async () => {
   };
   const content = Yjs.encodeStateAsUpdateV2(doc.spaceDoc)
   const noteCreatePayload: NoteCreatePayload = {
-    title: doc.meta.title,
-    tags: Array.from(doc.meta.tags),
+    title: doc.spaceDoc.getText("title").toString(),
+    tags: doc.spaceDoc.getArray<string>("tags").toArray(),
     content: Array.from(content),
   }
   // update note remote content
@@ -190,10 +203,7 @@ const onSaveClicked = async () => {
         duration: 5000,
       })
       isSaving.value = false;
-      // const { collection } = doc
-      // const job = new Job({ collection })
-      // const json = await job.docToSnapshot(doc)
-      // console.log('json', json)
+
     } else {
       console.error('save failed')
       toast({
@@ -219,8 +229,8 @@ const onSaveClicked = async () => {
 <template>
   <div
     :class="isMaximized ? 'p-32px fixed top-0 left-0 z-100 w-full h-full flex justify-center items-center bg-[var(--bg-100)]' : ''">
-    <div :class="isMaximized ? 'h-full w-768px shadow-xl' : ''" class="transition-all transition-2000 min-h-400px editor-container-wrapper relative border-(1px solid [var(--bg-200)]) 
-    bg-[var(--bg-50)] rounded-16px flex flex-col overflow-hidden">
+    <div :class="isMaximized ? 'h-full w-768px shadow-xl' : ''" class="transition-all h-full transition-2000 min-h-400px editor-container-wrapper relative border-(1px solid [var(--bg-200)]) 
+    bg-[var(--bg-50)] rounded-0px flex flex-col overflow-hidden">
       <div class=" py-4px px-16px flex text-[var(--text-200)] ">
         <Icon v-if="!isSaving" @click="onSaveClicked" size="6"
           class="ml-auto mr-8px p-4px bg-[var(--bg-100)] hover:text-[var(--accent-100)] cursor-pointer rounded-1/2"
@@ -243,12 +253,7 @@ const onSaveClicked = async () => {
         <Icon size="6" class="p-4px bg-[var(--bg-100)] hover:text-[var(--accent-100)] cursor-pointer rounded-1/2"
           @click="editorMode = 'edgeless'" v-else icon="lucide:notepad-text" />
       </div>
-      <div class="transition transition-2000 editor-container bg-[var(--bg-50)] grow-1 overflow-auto"
-        ref="editorContainerRef"></div>
-      <div class="pb-16px pt-8px px-8px bg-[var(--bg-50)] border-t-1px border-t-[var(--bg-150)]">
-        <div class="">
-          <Tags v-model="tags" />
-        </div>
+      <div class="h-full transition transition-2000 bg-[var(--bg-50)] grow-1 overflow-auto" ref="editorContainerRef">
       </div>
       <div v-if="isLoading"
         class="absolute right-0 bottom-0 left-0 top-0 bg-[var(--bg-50)] flex items-center justify-center">

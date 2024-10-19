@@ -17,8 +17,8 @@ import { useToast } from '~/components/toast/use-toast'
 
 const { toast } = useToast()
 
-blocksEffects();
-presetsEffects();
+// blocksEffects();
+// presetsEffects();
 
 const schema = new Schema().register(AffineSchemas);
 const collection = new DocCollection({ schema });
@@ -58,7 +58,7 @@ onMounted(async () => {
                 id: meta.note_id,
                 title: meta.title,
                 tags: meta.tags,
-                createDate: new Date(meta.created_at).getMilliseconds(),
+                createDate: new Date(meta.created_at).getTime(),
                 type: meta.note_type
             });
         }

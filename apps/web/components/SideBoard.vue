@@ -12,16 +12,25 @@ const update = () => {
 
 <template>
     <div class="group relative">
-        <div :class="'h-100% transition-width ease-out transition-5000 overflow-hidden border-r-(1px [var(--bg-200)] solid) bg-[var(--bg-100)] ' + (isFloat
+        <div :class="'transition-width ease-out transition-5000 overflow-hidden border-r-(1px [var(--bg-200)] solid) bg-[var(--bg-100)] ' + (isFloat
             ? ' fixed transform w-0 group-hover:(w-300px shadow-2xl) h-100vh' : 'relative w-300px')">
-            <div class=" w-300px h-100vh p-8px flex flex-col justify-start">
+            <div class=" w-300px p-8px flex h-100vh flex-col justify-start">
                 <div class="h-64px flex items-center">
                     <img class=" hero animate-rotate-in-down-left border-2px hover:border-[var(--accent-100)] w-48px h-48px rounded-1/2"
                         src="https://picsum.photos/200/200" />
-                    <span class="ml-8px text-20px">Notisfly</span>
+                    <span class="ml-8px text-20px">流动的北极光</span>
                 </div>
                 <DateTime />
-                <NoteList class="grow-1" />
+                <div class="group/list px-8px flex items-center cursor-pointer mt-32px">
+                    <Icon icon="lucide:file-text" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
+                    文章笔记
+                </div>
+                <div class="group/list px-8px flex items-center cursor-pointer mt-16px">
+                    <Icon icon="lucide:list-todo" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
+                    代办事项
+                </div>
+                <!-- <NoteList class="grow-1" /> -->
+
             </div>
         </div>
         <div @click="isFloat = !isFloat" :class="'transform -translate-y-50% hover:color-blue color-[var(--text-200)] cursor-pointer bg-[var(--bg-100)] ' + (isFloat

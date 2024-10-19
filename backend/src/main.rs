@@ -1,9 +1,9 @@
 mod api;
 mod cli;
 mod db;
+mod error;
 mod profile;
 mod store;
-mod error;
 
 use std::{
     collections::HashMap,
@@ -14,6 +14,8 @@ use std::{
 use axum::Router;
 use sqlx::{Pool, Postgres};
 use tokio::signal;
+
+use tower_http::services::ServeDir;
 
 #[derive(Clone, Debug)]
 struct AppState {
@@ -45,11 +47,12 @@ async fn main() {
 
     let app = Router::new()
         .nest("/api", api::register())
+        .nest_service("/", ServeDir::new("assets"))
         .with_state(app_state);
 
     let (shutdown_send, mut shutdown_recv) = tokio::sync::mpsc::unbounded_channel::<bool>();
     let (close_send, close_recv) = tokio::sync::mpsc::unbounded_channel::<bool>();
-    
+
     tokio::spawn(async move {
         tracing_subscriber::fmt::init();
 

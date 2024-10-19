@@ -3,15 +3,15 @@ import { useColorMode, useMediaQuery } from '@vueuse/core'
 
 const isPreferredDark = useMediaQuery('(prefers-color-scheme: dark)')
 
-watch(()=>isPreferredDark.value, (value) => {
-    if(value) {
+watch(() => isPreferredDark.value, (value) => {
+    if (value) {
         // dark
         document.querySelector('html')?.setAttribute('data-theme', 'dark')
     } else {
         // light
         document.querySelector('html')?.setAttribute('data-theme', 'light')
     }
-}, {immediate: true})
+}, { immediate: true })
 
 </script>
 
@@ -21,7 +21,7 @@ watch(()=>isPreferredDark.value, (value) => {
     </div>
 </template>
 
-<style>
+<style lang="scss">
 @media (prefers-color-scheme: dark) {
     :root {
         --primary-100: #0085ff;
@@ -66,5 +66,15 @@ html {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+*::-webkit-scrollbar {
+    height: 5px;
+    width: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--bg-200);
+    border-radius: 2px;
 }
 </style>

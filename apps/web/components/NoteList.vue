@@ -94,7 +94,7 @@ const onDnidClicked = (event: MouseEvent) => {
 </script>
 
 <template>
-    <div class="flex flex-col">
+    <div class="pb-32px flex flex-col overflow-hidden">
         <div class="flex items-center mt-32px">
             <div>文章</div>
             <Icon v-if="!metasSynced" class="ml-8px cursor-pointer animate-spin" icon="lucide:loader" />
@@ -118,14 +118,13 @@ const onDnidClicked = (event: MouseEvent) => {
                 <Icon @click="onAddClicked" class="ml-auto cursor-pointer" icon="lucide:circle-plus" />
             </template>
         </div>
-        <div class="grow-1 overflow-y-auto">
+        <div class=" overflow-y-auto my-16px pr-4px">
             <!-- <div @click="onTitleClicked(meta)" class="text-[var(--text-200)] relative my-4px rounded-8px px-4px py-2px border-(1px [var(--bg-200)]) cursor-pointer ml-8px" v-for="meta in docMetas" :key="meta.id">
             {{ meta.title || `Note(#${meta.id})` }}
             <div v-if="docId === meta.id" class=" absolute -left-8px top-1/2 transform -translate-y-1/2 w-4px h-12px rounded-2px bg-gradient-to-b bg-gradient-from-transparent bg-gradient-to-[var(--accent-100)]"></div>
         </div> -->
             <template v-for="meta in docMetas" :key="meta.id">
-                <NoteTitleCard v-if="meta.type === 'note'" class="first:mt-16px" @click="onTitleClicked(meta)"
-                    :meta="meta">
+                <NoteTitleCard v-if="meta.type === 'note'" class="" @click="onTitleClicked(meta)" :meta="meta">
                     <template #left="{ meta }">
                         <div v-if="docId === meta.id"
                             class=" absolute -left-2px top-1/2 transform -translate-y-1/2 w-4px h-16px rounded-2px bg-gradient-to-b bg-gradient-from-transparent bg-gradient-to-[var(--accent-100)]">

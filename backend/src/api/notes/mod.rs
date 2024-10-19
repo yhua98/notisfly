@@ -17,7 +17,7 @@ use super::{auth::Claims, types::ResponsePayload};
 pub fn register() -> Router<AppState> {
     Router::new()
         .route("/", get(get_notes))
-        .route("/", put(create_note))
+        .route("/create", put(create_note))
         .route("/:id", get(get_note))
         .route("/:id", patch(update_note))
         .route("/metas", post(get_metas))
