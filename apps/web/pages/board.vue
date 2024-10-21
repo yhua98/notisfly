@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue'
 definePageMeta({
-    layout: 'data-board'
+    layout: 'board'
 })
 </script>
 
@@ -18,13 +18,14 @@ definePageMeta({
                     <ThemeSwitch class="ml-auto" />
                 </div>
                 <div class="flex databoard-content-wrapper h-[calc(100%-64px)] overflow-auto">
-                    <EditorManualContainer class="w-768px h-full mx-auto" />
+                    <!-- <EditorManualContainer class="w-768px h-full mx-auto" />
                     <div class="relative px-8px w-300px border-l-(1px solid [var(--bg-200)])">
                         <NoteList />
                         <div class="absolute top-50% left-0 -translate-y-50% -translate-x-50% text-[var(--text-200)]">
                             <Icon size="4" icon="lucide:grip-vertical" class="cursor-col-resize" />
                         </div>
-                    </div>
+                    </div> -->
+                    <NuxtPage />
                 </div>
             </div>
         </div>

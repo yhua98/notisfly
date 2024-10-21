@@ -1,4 +1,5 @@
 mod auth;
+mod mongo;
 mod notes;
 mod shortnotes;
 mod types;
@@ -10,7 +11,8 @@ use crate::AppState;
 
 pub fn register() -> Router<AppState> {
     Router::new()
-        .nest("/shortnote", shortnotes::register())
+        .nest("/v1/shortnote", shortnotes::register())
         .nest("/user", user::register())
-        .nest("/notes", notes::register())
+        .nest("/v1/notes", notes::register())
+        .nest("/notes", mongo::register())
 }

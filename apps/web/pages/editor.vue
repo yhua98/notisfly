@@ -13,7 +13,7 @@ const { toast } = useToast()
 definePageMeta({
     title: 'Editor',
     description: 'Editor page',
-    layout: 'data-board'
+    layout: 'board'
 })
 
 let docId = "tsfAZqaQoXtZbSNL"

@@ -9,14 +9,15 @@ export declare class NotEditor extends NotEditor_base {
     accessor pageEditor: PageEditor;
     accessor tags: string[];
     accessor doc: Doc;
-    setDoc(doc: Doc): void;
-    connectedCallback(): void;
-    private addTag;
     accessor title: string;
     accessor isReadonly: boolean;
     accessor yText: Y.Text;
+    accessor readonly: boolean;
     setTitle(event: InputEvent): void;
     accessor titleInput: HTMLInputElement;
+    setDoc(doc: Doc): void;
+    private addTag;
+    connectedCallback(): void;
     render(): import("lit").TemplateResult<1>;
     constructor();
 }

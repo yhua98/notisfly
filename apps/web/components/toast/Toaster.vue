@@ -12,7 +12,9 @@ const { toasts } = useToast()
             <div class="toast relative w-200px bg-[var(--bg-200)] mt-8px first:mt-0 p-8px rounded-8px"
                 v-for="toast in toasts" :key="toast.id">
                 <div class="flex items-center">
-                    <Icon class="mr-4px text-[var(--accent-100)]" icon="lucide:info" />
+                    <Icon v-if="toast.type === 'info'" class="mr-4px text-[var(--accent-100)]" icon="lucide:info" />
+                    <Icon v-else-if="toast.type === 'error'" class="text-red mr-4px text-[var(--accent-100)]"
+                        icon="lucide:circle-x" />
                     {{ toast.title }}
                 </div>
                 <div class="text-0.75em ml-2px text-[var(--text-200)]">{{ toast.description }}</div>

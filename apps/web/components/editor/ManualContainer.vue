@@ -3,7 +3,7 @@ import { inject, ref } from 'vue';
 import { onEffectCleanup } from "@vue/reactivity"
 import type { AppState } from './ManualProvider.vue';
 import Tags from './tags/Tags.vue';
-import { AffineEditorContainer } from '@blocksuite/presets'
+import { AffineEditorContainer, createEmptyDoc } from '@blocksuite/presets'
 import { NotEditor } from '@notisfly/editor'
 import { RefNodeSlotsExtension, RefNodeSlotsProvider } from '@blocksuite/blocks';
 import { Icon } from '@iconify/vue'
@@ -48,7 +48,9 @@ watch(() => tags.value, (tags) => {
 });
 
 watch(() => docIdRef.value, async (docId) => {
-  if (!docId) return;
+  if (!docId) {
+    return
+  };
   isLoading.value = true;
   await collection.waitForSynced();
   // request note remote content
@@ -167,6 +169,16 @@ const onSaveClicked = async () => {
   const job = new Job({ collection })
   const json = await job.docToSnapshot(doc)
   console.log('json', json)
+  {
+    await http.post(getFullUrl('/api/mongo/save'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
+      },
+      body: JSON.stringify(json),
+    })
+  }
   isSaving.value = false;
   return
   if (!doc || !doc.meta) {
@@ -224,12 +236,49 @@ const onSaveClicked = async () => {
     return
   }
 }
+
+onMounted(async () => {
+  await http.get(getFullUrl('/api/mongo/todos'), {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
+    },
+  }).then(async ({ data, status }) => {
+    if (status === 200 && data) {
+      const todos = data.map(item => ({
+        flavour: item.blocks.flavour,
+        id: item.blocks.id,
+        props: item.blocks.props,
+        type: item.blocks.type,
+        version: item.blocks.version,
+        children: []
+      }))
+      console.log('todos', todos)
+
+      const doc = createEmptyDoc().init()
+
+      const job = new Job({ collection })
+      const json = await job.docToSnapshot(doc)
+
+      json.blocks.children[1].children = todos
+
+      console.log("json", json)
+
+      const newDoc = await job.snapshotToDoc(json);
+
+      editor.setDoc(newDoc)
+      editorContainerRef.value.appendChild(editor);
+    }
+  })
+})
+
 </script>
 
 <template>
   <div
     :class="isMaximized ? 'p-32px fixed top-0 left-0 z-100 w-full h-full flex justify-center items-center bg-[var(--bg-100)]' : ''">
-    <div :class="isMaximized ? 'h-full w-768px shadow-xl' : ''" class="transition-all h-full transition-2000 min-h-400px editor-container-wrapper relative border-(1px solid [var(--bg-200)]) 
+    <div :class="isMaximized ? 'h-full w-768px shadow-xl rounded-16px' : ''" class="transition-all h-full transition-2000 min-h-400px editor-container-wrapper relative border-(1px solid [var(--bg-200)]) 
     bg-[var(--bg-50)] rounded-0px flex flex-col overflow-hidden">
       <div class=" py-4px px-16px flex text-[var(--text-200)] ">
         <Icon v-if="!isSaving" @click="onSaveClicked" size="6"
@@ -262,11 +311,7 @@ const onSaveClicked = async () => {
           <Icon size="5" class="animate-spin absolute top-12px left-0" icon="lucide:loader" />
         </div>
       </div>
-      <div v-if="!docIdRef"
-        class="text-[var(--text-200)] absolute right-0 bottom-0 left-0 top-0 bg-[var(--bg-50)] flex flex-col items-center justify-center">
-        <Icon icon="lucide:file-pen-line" size="12" />
-        <div class="mt-16px">没有选择文档</div>
-      </div>
+
     </div>
   </div>
 </template>

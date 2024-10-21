@@ -45,7 +45,7 @@ onMounted(async () => {
     // request short_note remote metas
     const { data, status } = await http.post<
         (DocMeta & { note_id: string, created_at: string, note_type: string })[]
-    >(getFullUrl('/api/notes/metas'), {
+    >(getFullUrl('/api/v1/notes/metas'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

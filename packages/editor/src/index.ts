@@ -17,46 +17,76 @@ blocksEffects();
 @customElement('not-editor')
 export class NotEditor extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 	static override styles = css`
-	:host {
-		padding: 24px;
+	.editor-container{
+		box-sizing: border-box;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		container-name: editor-container;
+		container-type: inline-size;
 	}
 
-	.editor-container{
-		padding: 24px;
+	.editor-container-header {
+		padding-right: var(--affine-editor-side-padding, 24px);
+		padding-left: var(--affine-editor-side-padding, 24px);
+		margin: 0 auto;
+		max-width: var(--affine-editor-width);
+		width: 100%;
+	}
+
+	@container editor-container (width <= 640px) {
+		.editor-container-header {
+			padding-right: 24px;
+			padding-left: 24px;
+		}
+	}
+
+	.editor-container-page-editor{
+		flex-grow: 1;
 	}
 
 	.tags {
-		
-		padding-left: 16px;
-	}
-
-	.tags > input {
-		outline: none;
-		background: transparent;
-		width: 4em;
-		padding: 2px 8px;
-		border: 1px solid #2200aa;
-		border-radius: 8px;
+		margin-bottom: 8px;
+		display: flex;
+		align-items: center;
 	}
 
 	.tag {
 		margin-left: 4px;
+		background-color: var(--custom-tag-bg);
+		padding: 4px 8px;
+		color: var(--custom-tag-color);
 	}
 	.tag:first-child{
 		margin-left: 0;
 	}
 	.tag:first-child {
 		margin-left: 0;
-		padding-left: 0;
+	}
+	.tags > input {
+		outline: none;
+		background: transparent;
+		width: 4em;
+		padding: 2px 8px;
+		border: 2px solid var(--custom-tag-border);
+		border-radius: 8px;
+		margin-left: 8px;
+	}
+
+	.tags > input:focus {
+		border-color: var(--custom-tag-focus-border);
+	}
+
+	.tags > input:first-child {
+		margin-left: 0;
 	}
 	.title {
-		margin-bottom: 16px;
+		margin-bottom: 8px;
 	}
 	.title > input {
 		background: transparent;
 		outline: none;
-		padding: 0 16px;
-		font-size: 20px;
+		font-size: 24px;
 	}
 	`
 
@@ -72,28 +102,50 @@ export class NotEditor extends SignalWatcher(WithDisposable(ShadowlessElement)) 
 	@property({ attribute: false })
 	accessor doc!: Doc;
 
+
+
+	@property({ type: String })
+	override accessor title = '';
+
+	@property({ type: Boolean })
+	accessor isReadonly = false;
+
+	@property({ attribute: false })
+	accessor yText!: Y.Text;
+
+	@property({ attribute: false })
+	accessor readonly = false;
+
+	setTitle(event: InputEvent) {
+		this.title = (event.target as HTMLInputElement).value;
+		this.yText?.delete(0, this.yText.length);
+		this.yText?.insert(0, this.title);
+		this.doc.collection.setDocMeta(this.doc.id, { title: this.title });
+	}
+
+	@query('#title-input', false)
+	accessor titleInput!: HTMLInputElement;
+
 	setDoc(doc: Doc) {
 		this.doc = doc;
 		if (!doc) {
 			return
 		}
-		this.yText = undefined as any;
-		this.yText = doc.spaceDoc.getText('title');
+		// @ts-ignore
+		this.yText = doc.root.title.yText;
+
+		{
+			// init tags
+			const tags = doc.spaceDoc.getArray<string>('tags');
+			console.log('tags', this.doc.meta!.tags);
+			tags.insert(0, [...(this.doc.meta!.tags || [])]);
+		}
+
 		this.tags = doc.spaceDoc.getArray<string>('tags').toArray();
+		this.readonly = doc.readonly;
 		this.pageEditor.doc = doc;
 
 		if (this.titleInput) {
-			this.titleInput.value = this.yText.toString();
-		}
-
-		console.log('doc', this.titleInput);
-	}
-
-	override connectedCallback() {
-		super.connectedCallback();
-		console.log('connected');
-
-		if (this.doc && this.titleInput && this.yText) {
 			this.titleInput.value = this.yText.toString();
 		}
 	}
@@ -105,38 +157,31 @@ export class NotEditor extends SignalWatcher(WithDisposable(ShadowlessElement)) 
 		tags?.push([value]);
 		this.tags = [...this.tags, value];
 		target.value = '';
-		console.log(value, tags, this.doc?.spaceDoc.toJSON());
 		// this.requestUpdate();
 	}
 
-	@property({ type: String })
-	override accessor title = '';
+	override connectedCallback() {
+		super.connectedCallback();
 
-	@property({ type: Boolean })
-	accessor isReadonly = false;
-
-	@property({ attribute: false })
-	accessor yText!: Y.Text;
-
-	setTitle(event: InputEvent) {
-		this.title = (event.target as HTMLInputElement).value;
-		this.yText?.delete(0, this.yText.length);
-		this.yText?.insert(0, this.title);
+		setTimeout(() => {
+			if (this.doc && this.titleInput && this.yText) {
+				this.titleInput.value = this.yText.toString();
+			}
+		})
 	}
-
-	@query('input', false)
-	accessor titleInput!: HTMLInputElement;
 
 	override render() {
 		return html`<div class="editor-container">
-			<div class="title">
-				<input id="title-input" @input="${this.setTitle}" placeholder="标题" />
+			<div class="editor-container-header">
+				<div class="title">
+					<input .disabled="${this.readonly}" autocomplete="off" id="title-input" @input="${this.setTitle}" placeholder="标题" />
+				</div>
+				<div class="tags">
+					${repeat(this.tags, (tag) => tag, (tag) => html`<span class="tag">#${tag}</span>`)}
+					<input .disabled="${this.readonly}" @keyup="${enter.call(this, this.addTag)}" placeholder="+ tag" />
+				</div>
 			</div>
-            <div class="tags">
-				${repeat(this.tags, (tag) => tag, (tag) => html`<span class="tag">#${tag}</span>`)}
-				<input @keyup="${enter.call(this, this.addTag)}" placeholder="+ tag" />
-			</div>
-			<div>
+			<div class="editor-container-page-editor">
 				${this.doc && this.pageEditor}
 			</div>
         </div>`;

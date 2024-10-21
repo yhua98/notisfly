@@ -6,7 +6,7 @@ import { getFullUrl } from '~/constants'
 const router = useRouter()
 
 definePageMeta({
-    layout: 'data-board'
+    layout: 'board'
 })
 
 const isLogin = ref(true)

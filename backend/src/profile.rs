@@ -12,6 +12,7 @@ pub enum Mode {
 #[derive(Debug, Clone)]
 pub struct Profile {
     pub db_url: String,
+    pub mongo_uri: String,
     pub mode: Mode,
     pub port: String,
 }
@@ -49,6 +50,7 @@ impl Profile {
 
         Ok(Self {
             db_url,
+            mongo_uri: dotenvy::var("MONGO_URI").unwrap(),
             mode: Mode::DEV,
             port,
         })

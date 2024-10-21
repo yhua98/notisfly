@@ -37,6 +37,11 @@ watch(() => isPreferredDark.value, (value) => {
         --bg-150: #1e2129;
         --bg-200: #2d2d2d;
         --bg-300: #454545;
+
+        --custom-tag-bg: #1e2119;
+        --custom-tag-color: #2b02f7;
+        --custom-tag-border: #322d20;
+        --custom-tag-focus-border: #6849a5;
     }
 }
 
@@ -55,6 +60,11 @@ watch(() => isPreferredDark.value, (value) => {
         --bg-150: #e5eaea;
         --bg-200: #f5f4f1;
         --bg-300: #cccbc8;
+
+        --custom-tag-bg: #1e2119;
+        --custom-tag-color: #2b02f7;
+        --custom-tag-border: #ebe5d8;
+        --custom-tag-focus-border: #6849a5;
     }
 }
 

@@ -21,13 +21,17 @@ const update = () => {
                     <span class="ml-8px text-20px">流动的北极光</span>
                 </div>
                 <DateTime />
-                <div class="group/list px-8px flex items-center cursor-pointer mt-32px">
-                    <Icon icon="lucide:file-text" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
-                    文章笔记
+                <div class="group/list px-8px cursor-pointer mt-32px">
+                    <NuxtLink class="flex items-center" to="/board/note">
+                        <Icon icon="lucide:file-text" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
+                        文章笔记
+                    </NuxtLink>
                 </div>
-                <div class="group/list px-8px flex items-center cursor-pointer mt-16px">
-                    <Icon icon="lucide:list-todo" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
-                    代办事项
+                <div class="group/list px-8px cursor-pointer mt-16px">
+                    <NuxtLink class="flex items-center" to="/board/todos">
+                        <Icon icon="lucide:list-todo" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
+                        代办事项
+                    </NuxtLink>
                 </div>
                 <!-- <NoteList class="grow-1" /> -->
 

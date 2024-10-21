@@ -20,6 +20,7 @@ use tower_http::services::ServeDir;
 #[derive(Clone, Debug)]
 struct AppState {
     db: Pool<Postgres>,
+    mongo: mongodb::Client,
     docs: Arc<RwLock<HashMap<String, yrs::Doc>>>,
     #[allow(unused)]
     profile: profile::Profile,
@@ -38,9 +39,11 @@ async fn main() {
     println!("{}", profile.clone().banner());
 
     let db_conn = db::connect(profile.db_url.clone()).await.unwrap();
+    let mongo_conn = db::connect_mongo(profile.mongo_uri.clone()).await;
 
     let app_state = AppState {
         db: db_conn.clone(),
+        mongo: mongo_conn.clone(),
         docs: Arc::new(RwLock::new(HashMap::new())),
         profile: profile.clone(),
     };

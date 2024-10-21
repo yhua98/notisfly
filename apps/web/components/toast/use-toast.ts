@@ -4,11 +4,14 @@ type Toast = {
 	description: string;
 	type: 'info' | 'success' | 'warning' | 'error';
 	onClose?: () => void;
+	duration?: number;
 };
 
 type State = {
 	toasts: Toast[];
 };
+
+type ToastOptions = Partial<Toast>
 
 const idCreator = (() => {
 	let id = 0;
@@ -27,10 +30,9 @@ function dispatch(toast: Toast, duration: number) {
 		state.value.toasts = state.value.toasts.filter((t) => t.id !== toast.id);
 	};
 	const close = setTimeout(() => {
-		console.log('close', toast.id);
 		clearToast();
 	}, duration);
-	const oldOnClose = toast.onClose || (() => {});
+	const oldOnClose = toast.onClose || (() => { });
 	toast.onClose = () => {
 		clearTimeout(close);
 		oldOnClose();
@@ -39,7 +41,7 @@ function dispatch(toast: Toast, duration: number) {
 	state.value.toasts = [toast, ...state.value.toasts];
 }
 
-function toast(toast: Partial<Toast> & { duration: number }) {
+function toast(toast: ToastOptions) {
 	const id = idCreator();
 	const newToast: Toast = {
 		id,
@@ -52,9 +54,14 @@ function toast(toast: Partial<Toast> & { duration: number }) {
 	dispatch(newToast, duration);
 }
 
+toast.error = function (toastOptions: ToastOptions) {
+	toast({ ...toastOptions, type: 'error' });
+}
+
 export function useToast() {
 	return {
 		toasts: computed(() => state.value.toasts),
 		toast,
+		error: toast.error,
 	};
 }
