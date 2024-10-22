@@ -61,7 +61,7 @@ async fn create_note(
             Json(ResponsePayload {
                 data: None,
                 message: "Success".to_string(),
-                status: 201,
+                status: 2000,
             }),
         ),
         Err(_) => (

@@ -15,7 +15,7 @@ definePageMeta({
             <div class="grow-1">
                 <div class="h-64px flex items-center px-16px 
                 border-b-(1px solid [var(--bg-200)])">
-                    <ThemeSwitch class="ml-auto" />
+                    <TopOpt />
                 </div>
                 <div class="flex databoard-content-wrapper h-[calc(100%-64px)] overflow-auto">
                     <!-- <EditorManualContainer class="w-768px h-full mx-auto" />

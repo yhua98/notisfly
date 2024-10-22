@@ -9,7 +9,7 @@ import { effects as blocksEffects } from '@blocksuite/blocks/effects'
 import { effects as presetsEffects } from '@blocksuite/presets/effects'
 
 import { ref } from 'vue';
-import { getFullUrl } from '~/constants';
+import { getFullUrl, STATUS_FETCH } from '~/constants';
 
 import * as http from '~/utils/http'
 
@@ -43,23 +43,22 @@ onMounted(async () => {
     metasSynced.value = false;
     await collection.waitForSynced();
     // request short_note remote metas
-    const { data, status } = await http.post<
+    const { data, status } = await http.get<
         (DocMeta & { note_id: string, created_at: string, note_type: string })[]
-    >(getFullUrl('/api/v1/notes/metas'), {
-        method: 'POST',
+    >(getFullUrl('/api/notes/meta'), {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
         },
     });
-    if (status === 200 && Array.isArray(data)) {
+    if (status === STATUS_FETCH.SUCCESS && Array.isArray(data)) {
         for (const meta of data) {
             collection.meta.addDocMeta({
-                id: meta.note_id,
+                id: meta.id,
                 title: meta.title,
                 tags: meta.tags,
-                createDate: new Date(meta.created_at).getTime(),
-                type: meta.note_type
+                createDate: meta.createDate,
+                type: 'note'
             });
         }
         toast({

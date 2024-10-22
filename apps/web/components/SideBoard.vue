@@ -8,6 +8,10 @@ const update = () => {
     console.log(isFloat.value)
     isFloat.value = !isFloat.value
 }
+
+const route = useRoute()
+
+const currentActive = computed(() => route.path)
 </script>
 
 <template>
@@ -21,19 +25,27 @@ const update = () => {
                     <span class="ml-8px text-20px">流动的北极光</span>
                 </div>
                 <DateTime />
-                <div class="group/list px-8px cursor-pointer mt-32px">
+                <div class="group/list px-8px cursor-pointer mt-32px"
+                    :class="route.path.startsWith('/board/note') ? 'text-[var(--text-100)]' : 'text-[var(--text-200)]'">
                     <NuxtLink class="flex items-center" to="/board/note">
                         <Icon icon="lucide:file-text" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
                         文章笔记
                     </NuxtLink>
                 </div>
-                <div class="group/list px-8px cursor-pointer mt-16px">
+                <div class="group/list px-8px cursor-pointer mt-16px"
+                    :class="route.path.startsWith('/board/todos') ? 'text-[var(--text-100)]' : 'text-[var(--text-200)]'">
                     <NuxtLink class="flex items-center" to="/board/todos">
                         <Icon icon="lucide:list-todo" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
-                        代办事项
+                        待办事项
                     </NuxtLink>
                 </div>
-                <!-- <NoteList class="grow-1" /> -->
+                <div class="group/list px-8px cursor-pointer mt-16px"
+                    :class="route.path.startsWith('/board/diary') ? 'text-[var(--text-100)]' : 'text-[var(--text-200)]'">
+                    <NuxtLink class="flex items-center" to="/board/diary">
+                        <Icon icon="lucide:calendar-range" class="mr-4px group-hover/list:text-[var(--accent-100)]" />
+                        每日一记
+                    </NuxtLink>
+                </div>
 
             </div>
         </div>

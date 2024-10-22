@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue'
 import type { AppState } from './editor/ManualProvider.vue';
-import { getFullUrl } from '~/constants';
+import { getFullUrl, STATUS_FETCH } from '~/constants';
 import { useToast } from '~/components/toast/use-toast'
-import type { DocMeta } from '@blocksuite/store'
+import { Job, type DocMeta } from '@blocksuite/store'
+import * as http from '~/utils/http'
 
 const { toast } = useToast()
+const router = useRouter()
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
 const { collection, docId, metasSynced, docSyncUrl } = inject<AppState>('appState')!;
@@ -26,50 +28,79 @@ const updateDocMetaList = () => {
         type: meta.type
     }))
     // console.log(metas)
-    docMetas.value = metas
+    docMetas.value = metas.reverse()
 }
-
-watch(() => docMetas.value, (v) => {
-    console.log(v)
-})
 
 onMounted(async () => {
     await collection.waitForSynced();
     isConnected.value = true
     updateDocMetaList()
-    // collection.meta.docMetaAdded.on((v) => {
-    //     const meta = collection.meta.getDocMeta(v)
-    //     if (!meta) return;
-    //     docMetas.value = [...docMetas.value, {
-    //         tags: Array.from(meta.tags),
-    //         title: meta.title,
-    //         id: meta.id,
-    //         createDate: meta.createDate,
-    //         type: meta.type
-    //     }]
-    // })
-    // collection.meta.docMetaRemoved.on((v) => {
-    //     docMetas.value = docMetas.value.filter(meta => meta.id !== v)
-    // })
     collection.meta.docMetaUpdated.on(updateDocMetaList)
 })
 
+const onAddClicked = async () => {
+    const id = collection.idGenerator()
+    collection.meta.addDocMeta({
+        id,
+        title: 'Untitled',
+        tags: [],
+        createDate: Date.now(),
+        type: 'note'
+    })
+    const doc = collection.getDoc(id)!
+    doc.load(() => {
+        const parentId = doc.addBlock("affine:page")
+        const noteId = doc.addBlock("affine:note", {}, parentId)
+        doc.addBlock("affine:paragraph", {}, noteId)
+    })
+    const job = new Job({ collection })
 
+    const docJson = (await job.docToSnapshot(doc))!
+
+    const { status, message } = await http.post(getFullUrl(`/api/notes`), {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access-token')}`,
+        },
+        body: JSON.stringify(docJson),
+    })
+
+    if (status === STATUS_FETCH.SUCCESS) {
+        toast({
+            title: '添加成功',
+            description: '添加成功',
+            duration: 3000,
+        })
+        router.push(`/board/note/${id}`)
+    } else {
+        toast.error({
+            title: '添加失败',
+            description: message,
+            duration: 5000,
+        })
+    }
+}
 
 </script>
 
 <template>
-    <div class="pb-32px flex flex-col overflow-hidden">
-        <div class="flex items-center mt-32px px-8px">
-            <div>文章</div>
-            <Icon v-if="!metasSynced" class="ml-8px cursor-pointer animate-spin" icon="lucide:loader" />
-            <template v-else>
-                <Icon v-if="!isConnected" class="ml-8px cursor-pointer text-red" icon="lucide:link-2-off" />
-                <Icon v-else class="ml-8px cursor-pointer text-[var(--accent-100)]" icon="lucide:link-2" />
-                <Icon class="ml-auto cursor-pointer" icon="lucide:circle-plus" />
-            </template>
+    <div class="h-full flex flex-col overflow-hidden">
+        <div class="flex justify-end">
+            <button @click="onAddClicked" class="cursor-pointer hover:border-(2px solid [var(--accent-100)]) 
+                py-4px px-8px rounded-8px text-[var(--text-100)] bg-[var(--accent-100)] 
+                border-(2px solid [var(--bg-200)])">新建文章</button>
         </div>
-        <div class=" overflow-y-auto my-16px pr-4px">
+        <div class="mb-8px">
+            <div class="text-0.75rem text-[var(--text-200)]">最近更新</div>
+        </div>
+        <div class="flex border-b-(1px solid [var(--bg-200)]) pb-8px">
+            <div class="text-1rem text-[var(--text-200)]">标题</div>
+            <div class="ml-auto"></div>
+            <div class="text-1rem text-[var(--text-200)] w-150px">标签</div>
+            <div class="text-1rem text-[var(--text-200)] w-150px">更新时间</div>
+            <div class="text-1rem text-[var(--text-200)] w-150px">创建时间</div>
+        </div>
+        <div class="pr-4px overflow-y-auto">
             <template v-for="meta in docMetas" :key="meta.id">
                 <NuxtLink :to="`/board/note/${meta.id}`">
                     <NoteTitleCard v-if="meta.type === 'note'" class="" :meta="meta">
