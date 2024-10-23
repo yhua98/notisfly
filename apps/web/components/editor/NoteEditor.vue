@@ -37,6 +37,7 @@ const initPage = async (noteId: string) => {
         const doc = job.collection.getDoc(noteId)
         if (doc) {
             job.collection.removeDoc(doc.id)
+            job.collection.meta.removeDocMeta(doc.id)
         }
         const newDoc = (await job.snapshotToDoc(data))!;
         collection.meta.setDocMeta(newDoc.id, {

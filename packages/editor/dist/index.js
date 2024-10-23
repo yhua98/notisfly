@@ -133,6 +133,12 @@ let NotEditor = (() => {
 		flex-grow: 1;
 	}
 
+	.editor-container-page-editor .h1 {
+		font-size: 26px;
+		font-weight: 600;
+		height: auto !important;
+	}
+
 	.tags {
 		margin-bottom: 8px;
 		display: flex;
@@ -175,6 +181,7 @@ let NotEditor = (() => {
 		background: transparent;
 		outline: none;
 		font-size: 24px;
+		font-weight: 600;
 	}
 	`; }
         #name_accessor_storage = __runInitializers(this, _name_initializers, 'world');

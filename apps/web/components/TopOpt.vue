@@ -56,6 +56,8 @@ const onSaveClicked = async () => {
     })
 
     if (status === STATUS_FETCH.SUCCESS) {
+        // update doc meta
+        collection.meta.setDocMeta(noteId, docJson.meta)
         toast({
             title: '保存成功',
             description: '保存成功',

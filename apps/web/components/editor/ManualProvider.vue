@@ -13,6 +13,8 @@ import { getFullUrl, STATUS_FETCH } from '~/constants';
 
 import * as http from '~/utils/http'
 
+import { BlobStorage } from './blob'
+
 import { useToast } from '~/components/toast/use-toast'
 
 const { toast } = useToast()
@@ -20,8 +22,15 @@ const { toast } = useToast()
 // blocksEffects();
 // presetsEffects();
 
+// 初始化Blob内容存储
+const blobStorage = new BlobStorage("notisfly", false);
+
 const schema = new Schema().register(AffineSchemas);
-const collection = new DocCollection({ schema });
+const collection = new DocCollection({
+    schema, blobSources: {
+        main: blobStorage,
+    }
+});
 collection.meta.initialize();
 
 collection.start()

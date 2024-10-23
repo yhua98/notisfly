@@ -45,6 +45,12 @@ export class NotEditor extends SignalWatcher(WithDisposable(ShadowlessElement)) 
 		flex-grow: 1;
 	}
 
+	.editor-container-page-editor .h1 {
+		font-size: 26px;
+		font-weight: 600;
+		height: auto !important;
+	}
+
 	.tags {
 		margin-bottom: 8px;
 		display: flex;
@@ -87,6 +93,7 @@ export class NotEditor extends SignalWatcher(WithDisposable(ShadowlessElement)) 
 		background: transparent;
 		outline: none;
 		font-size: 24px;
+		font-weight: 600;
 	}
 	`
 
